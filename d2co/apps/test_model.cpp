@@ -68,13 +68,16 @@ void printLabel(string image_path, cv::Mat calib, string cat_id,Vec4f bbox,Vec3f
   string image_id = file_name.substr(0, file_name.rfind("."));
 
   ofstream file;
+  ofstream file2;
   //file.open(str.append(file_name, ".txt");
-  file.open("annotation.json", ofstream::app);
+  file.open("images_label.json", ofstream::app);
+  file2.open("annotations_label.json", ofstream::app);
   file << "\n\n{\"file_name\": \""<< file_name << "\"" 
         << ", \"id\": " << image_id
         << ", \"calib\": [" << calib.row(0) << ", " << calib.row(1) << ", " << calib.row(2) << "]}, \n"
-
-        <<"\n{\"image_id\": " << image_id
+        << endl;
+  
+  file2 <<"\n{\"image_id\": " << image_id
         <<", \"id\": " << image_id
         <<", \"category_id\": "<< cat_id
         <<", \"dim\": " << dim 
@@ -87,6 +90,7 @@ void printLabel(string image_path, cv::Mat calib, string cat_id,Vec4f bbox,Vec3f
         <<", \"rotation_y\": " << rotation_y
        << "}," << endl;
   file.close();
+  file2.close();
 
 
   cout << "\n{\"file_name\": \""<< file_name << "\"" 
