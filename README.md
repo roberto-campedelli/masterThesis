@@ -19,20 +19,22 @@ How to use CenterNet with your dataset:
 
 python main.py ddd --dataset my_dataset --batch_size 16 --master_batch 7 --num_epochs 10 --lr_step 45,60 --gpus 1
 
-The model created by the training is but by default in /exp/ddd/default/
+The model created by the training is located by default in /exp/ddd/default/
 
 #demo
 
 python demo.py ddd --demo ../data/my_dataset/images/ --load_model ../exp/ddd/default/model_last.pth
 
 How to test CenterNet with the Kitti dataset:
+
 -download the kitti dataset already in COCO format here: https://drive.google.com/drive/folders/11ab9_VLvncWKor2FmJkhdgoorAdDkEt8?usp=sharing
 -unzip the content of folder in CenterNet/data/kitti/
--use the previous commands changing the name of the dataset.
+-use the previous commands changing the name of the dataset
 
 -------------------------
 
 How to use d2co:
+
 - put your 3D CAD model in /bin/3D_models/
 - put your image and your camera calibration file in /bin/test_images/
 - run ./test_model -m 3D_models/my_model.stl -c test_images/my_test_camera_calib.yml -i test_images/my_image.jpg --rgb FF0000 --light
