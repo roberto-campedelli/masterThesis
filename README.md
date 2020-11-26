@@ -2,6 +2,7 @@
 
 References:
 https://github.com/xingyizhou/CenterNet
+
 https://bitbucket.org/alberto_pretto/d2co/src/master/
 
 How to use CenterNet with your dataset:
@@ -21,7 +22,7 @@ The model created by the training is but by default in /exp/ddd/default/
 python demo.py ddd --demo ../data/my_dataset/images/ --load_model ../exp/ddd/default/model_last.pth
 
 How to test CenterNet with the Kitti dataset:
--download the kitti dataset already in COCO format here:
+-download the kitti dataset already in COCO format here: https://drive.google.com/drive/folders/11ab9_VLvncWKor2FmJkhdgoorAdDkEt8?usp=sharing
 -unzip the content of folder in CenterNet/data/kitti/
 -use the previous commands changing the name of the dataset.
 
