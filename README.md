@@ -1,11 +1,13 @@
 # Master Thesis
 
 References:
+
 https://github.com/xingyizhou/CenterNet
 
 https://bitbucket.org/alberto_pretto/d2co/src/master/
 
 How to use CenterNet with your dataset:
+
 - put your data(annotations and images) in the data folder, the annotations file has to be in COCO format. 
 - create a file "my_dataset.py" in CenterNet/src/lib/datasets/dataset/
 - modify the following file with your dataset's info:
@@ -14,11 +16,13 @@ How to use CenterNet with your dataset:
     -/CenterNet/src/lib/utils/debugger.py
 
 #train
+
 python main.py ddd --dataset my_dataset --batch_size 16 --master_batch 7 --num_epochs 10 --lr_step 45,60 --gpus 1
 
 The model created by the training is but by default in /exp/ddd/default/
 
 #demo
+
 python demo.py ddd --demo ../data/my_dataset/images/ --load_model ../exp/ddd/default/model_last.pth
 
 How to test CenterNet with the Kitti dataset:
