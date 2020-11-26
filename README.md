@@ -27,9 +27,9 @@ python demo.py ddd --demo ../data/my_dataset/images/ --load_model ../exp/ddd/def
 
 How to test CenterNet with the Kitti dataset:
 
--download the kitti dataset already in COCO format here: https://drive.google.com/drive/folders/11ab9_VLvncWKor2FmJkhdgoorAdDkEt8?usp=sharing
--unzip the content of folder in CenterNet/data/kitti/
--use the previous commands changing the name of the dataset
+- download the kitti dataset already in COCO format here: https://drive.google.com/drive/folders/11ab9_VLvncWKor2FmJkhdgoorAdDkEt8?usp=sharing
+- unzip the content of folder in CenterNet/data/kitti/
+- use the previous commands changing the name of the dataset
 
 -------------------------
 
