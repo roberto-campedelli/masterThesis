@@ -1,0 +1,634 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<World>
+  <Robots>
+    <Robot Name="Robot">
+      <RobotControllerType>ITR.Binpicking.DotNet.RobotControllerSNPX</RobotControllerType>
+      <FirstRegister>501</FirstRegister>
+      <LastRegister>601</LastRegister>
+      <FirstDigitalInput>0</FirstDigitalInput>
+      <LastDigitalInput>100</LastDigitalInput>
+      <FirstDigitalOutput>0</FirstDigitalOutput>
+      <LastDigitalOutput>100</LastDigitalOutput>
+      <FirstGroupInput>0</FirstGroupInput>
+      <LastGroupInput>100</LastGroupInput>
+      <FirstGroupOutput>0</FirstGroupOutput>
+      <LastGroupOutput>100</LastGroupOutput>
+      <OverturnerEnabled>True</OverturnerEnabled>
+      <HasFixedRotation>False</HasFixedRotation>
+      <RegistersConfiguration>
+        <Registers>
+          <Register>
+            <ID>507</ID>
+            <Name>Camera Calibration Command</Name>
+          </Register>
+          <Register>
+            <ID>501</ID>
+            <Name>Command</Name>
+          </Register>
+          <Register>
+            <ID>502</ID>
+            <Name>Result</Name>
+          </Register>
+          <Register>
+            <ID>503</ID>
+            <Name>State</Name>
+          </Register>
+          <Register>
+            <ID>504</ID>
+            <Name>Abort request</Name>
+          </Register>
+          <Register>
+            <ID>505</ID>
+            <Name>Current bin</Name>
+          </Register>
+          <Register>
+            <ID>506</ID>
+            <Name>Candidates count</Name>
+          </Register>
+          <Register>
+            <ID>508</ID>
+            <Name>Last Command</Name>
+          </Register>
+          <Register>
+            <ID>511</ID>
+            <Name>Gripper channel 1</Name>
+          </Register>
+          <Register>
+            <ID>512</ID>
+            <Name>Gripper channel 2</Name>
+          </Register>
+          <Register>
+            <ID>513</ID>
+            <Name>Gripper channel 3</Name>
+          </Register>
+          <Register>
+            <ID>514</ID>
+            <Name>Gripper channel 4</Name>
+          </Register>
+          <Register>
+            <ID>509</ID>
+            <Name>Flipped</Name>
+          </Register>
+          <Register>
+            <ID>510</ID>
+            <Name>Current area</Name>
+          </Register>
+          <Register>
+            <ID>515</ID>
+            <Name>Panoramic position count</Name>
+          </Register>
+          <Register>
+            <ID>516</ID>
+            <Name>Gripper offset X</Name>
+          </Register>
+          <Register>
+            <ID>517</ID>
+            <Name>Gripper offset Y</Name>
+          </Register>
+          <Register>
+            <ID>518</ID>
+            <Name>Gripper offset R</Name>
+          </Register>
+          <Register>
+            <ID>519</ID>
+            <Name>Use close-up image</Name>
+          </Register>
+          <Register>
+            <ID>570</ID>
+            <Name>Close-up images count</Name>
+          </Register>
+          <Register>
+            <ID>571</ID>
+            <Name>Visual align images count</Name>
+          </Register>
+          <Register>
+            <ID>572</ID>
+            <Name>Perform Visual Align</Name>
+          </Register>
+        </Registers>
+        <DigitalOutputs>
+          <RobotDigitalOutput>
+            <ID>33</ID>
+            <Name>Activate Illuminator0</Name>
+          </RobotDigitalOutput>
+        </DigitalOutputs>
+        <PositionRegisters>
+          <Register>
+            <ID>520</ID>
+            <Name>TCP Position</Name>
+          </Register>
+          <Register>
+            <ID>530</ID>
+            <Name>Panoramic position</Name>
+          </Register>
+          <Register>
+            <ID>560</ID>
+            <Name>Pick position</Name>
+          </Register>
+          <Register>
+            <ID>550</ID>
+            <Name>Close-up position</Name>
+          </Register>
+          <Register>
+            <ID>540</ID>
+            <Name>Product position</Name>
+          </Register>
+        </PositionRegisters>
+      </RegistersConfiguration>
+      <Position>
+        <Row>
+          <Column>1</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>1</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+      </Position>
+      <ControllerParameters>
+        <IPAddress>192.168.100.4</IPAddress>
+      </ControllerParameters>
+      <Reachability>
+        <RotationLimits>
+          <Item>
+            <Limit />
+            <RotationLimit>
+              <FromZ>1.5707963267948966</FromZ>
+              <ToZ>3.1415926535897931</ToZ>
+            </RotationLimit>
+            <ApplyTo>1</ApplyTo>
+          </Item>
+          <Item>
+            <Limit />
+            <RotationLimit>
+              <FromZ>-3.1415926535897931</FromZ>
+              <ToZ>-1.5707963267948966</ToZ>
+            </RotationLimit>
+            <ApplyTo>1</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2670</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>0.052359877559829883</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2570</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>0</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2470</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.087266462599716474</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2370</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.12217304763960307</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2270</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.15707963267948966</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2170</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.20943951023931953</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-2070</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.24434609527920614</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-1970</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.26179938779914941</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-1870</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.27925268031909273</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+          <Item>
+            <Limit>
+              <ToY>-1770</ToY>
+            </Limit>
+            <RotationLimit>
+              <ToX>-0.27925268031909273</ToX>
+            </RotationLimit>
+            <ApplyTo>0</ApplyTo>
+          </Item>
+        </RotationLimits>
+      </Reachability>
+    </Robot>
+  </Robots>
+  <Cameras>
+    <Camera Name="Camera">
+      <BaseClassData>
+        <Driver>PylonGige</Driver>
+        <ImageHeight>1944</ImageHeight>
+        <ImageWidth>2592</ImageWidth>
+        <CameraCalibrationResult>
+          <ExecutionTime>02/08/2012 14.18</ExecutionTime>
+          <ReprojectionError>0.46405097680924806</ReprojectionError>
+        </CameraCalibrationResult>
+        <CameraHolder HolderType="ITR.Binpicking.DotNet.PickWorldCameraHolderRobot">
+          <Robot>Robot</Robot>
+          <HandEye>
+             <Row>
+    <Column>0.011291592111072382</Column>
+    <Column>-0.0064208833843681324</Column>
+    <Column>-0.99991563254314686</Column>
+    <Column>-257.47383481841348</Column>
+  </Row>
+  <Row>
+    <Column>-0.999922862265334</Column>
+    <Column>0.0051016393361398276</Column>
+    <Column>-0.011324433548141378</Column>
+    <Column>-81.825744247321083</Column>
+  </Row>
+  <Row>
+    <Column>0.0051739217910099014</Column>
+    <Column>0.99996637220091</Column>
+    <Column>-0.0063627824614878132</Column>
+    <Column>34.416288074474672</Column>
+  </Row>
+            <Row>
+              <Column>0</Column>
+              <Column>0</Column>
+              <Column>0</Column>
+              <Column>1</Column>
+            </Row>
+            <Rotation>
+              <X>-2.0827019135580587</X>
+              <Y>1.5578064350947232</Y>
+              <Z>-0.51704360667323412</Z>
+            </Rotation>
+          </HandEye>
+        </CameraHolder>
+        <BaseData>%YAML:1.0
+camera:
+   Intrinsics: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: d
+      data: [ 3.7836102046931178e+003, 0., 1.3511979719904882e+003, 0.,
+          3.7897374966115935e+003, 1.0490633089191706e+003, 0., 0., 1. ]
+   Distortion: !!opencv-matrix
+      rows: 1
+      cols: 5
+      dt: d
+      data: [ -1.2443582147768216e-001, 3.2200918758435065e-001,
+          -1.3077331614450378e-003, 2.3675378418680513e-003,
+          -3.8484928781012356e-001 ]
+   Position:
+      - -1.2642962858080864e-002
+      - -9.9990761280059814e-001
+      - 4.9890712834894657e-003
+      - -7.8079132080078125e+002
+      - 9.9987584352493286e-001
+      - -1.2689173221588135e-002
+      - -9.3420762568712234e-003
+      - -1.9012989501953125e+003
+      - 9.4045205041766167e-003
+      - 4.8703406937420368e-003
+      - 9.9994391202926636e-001
+      - -1.7252802734375000e+003
+   FocalLengthmm: !!opencv-matrix
+      rows: 1
+      cols: 1
+      dt: d
+      data: [ 8. ]
+   EntrancePupilDiameter: !!opencv-matrix
+      rows: 1
+      cols: 1
+      dt: d
+      data: [ 1.3999999999999999e+000 ]
+</BaseData>
+      </BaseClassData>
+      <Lasers />
+      <Illuminators>
+        <Illuminator Name="Illuminator0">
+          <Name>Illuminator0</Name>
+          <Level>1</Level>
+        </Illuminator>
+      </Illuminators>
+    </Camera>
+  </Cameras>
+  <Bins>
+    <Bin Name="Bin 1">
+      <Name>Bin 1</Name>
+      <Position>
+        <Row>
+          <Column>-0.012538053329643991</Column>
+          <Column>-0.999908908577933</Column>
+          <Column>0.0049971757213593268</Column>
+          <Column>-836.61361120719857</Column>
+        </Row>
+        <Row>
+          <Column>0.99987773198388163</Column>
+          <Column>-0.012584052345162775</Column>
+          <Column>-0.0092823870498618538</Column>
+          <Column>-2327.186336217474</Column>
+        </Row>
+        <Row>
+          <Column>0.0093444262248808738</Column>
+          <Column>0.0048801816627401136</Column>
+          <Column>0.9999444312187884</Column>
+          <Column>-813.54967378439574</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+      </Position>
+      <FarTopLeft>
+        <X>-478</X>
+        <Y>-250</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>666</X>
+        <Y>504</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+    <Bin Name="Bin 2">
+      <Name>Bin 2</Name>
+      <Position>
+        <Row>
+          <Column>-0.012538053329643873</Column>
+          <Column>-0.9999089085779328</Column>
+          <Column>0.0049971757213593242</Column>
+          <Column>-24.614</Column>
+        </Row>
+        <Row>
+          <Column>0.99987773198388141</Column>
+          <Column>-0.01258405234516259</Column>
+          <Column>-0.00928238704986186</Column>
+          <Column>-2327.186336217474</Column>
+        </Row>
+        <Row>
+          <Column>0.009344426224880872</Column>
+          <Column>0.0048801816627401145</Column>
+          <Column>0.9999444312187884</Column>
+          <Column>-813.54967378439574</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+        <Rotation>
+          <X>0.0048804141152349228</X>
+          <Y>-0.0093445622201289973</Y>
+          <Z>1.5833352561302383</Z>
+        </Rotation>
+      </Position>
+      <FarTopLeft>
+        <X>-478</X>
+        <Y>-250</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>666</X>
+        <Y>504</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+    <Bin Name="Bin 3">
+      <Name>Bin 3</Name>
+      <Position>
+        <Row>
+          <Column>-0.012538053329643873</Column>
+          <Column>-0.9999089085779328</Column>
+          <Column>0.0049971757213593242</Column>
+          <Column>798</Column>
+        </Row>
+        <Row>
+          <Column>0.99987773198388141</Column>
+          <Column>-0.01258405234516259</Column>
+          <Column>-0.00928238704986186</Column>
+          <Column>-2327.186336217474</Column>
+        </Row>
+        <Row>
+          <Column>0.009344426224880872</Column>
+          <Column>0.0048801816627401145</Column>
+          <Column>0.9999444312187884</Column>
+          <Column>-813.54967378439574</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+        <Rotation>
+          <X>0.0048804141152349228</X>
+          <Y>-0.0093445622201289973</Y>
+          <Z>1.5833352561302383</Z>
+        </Rotation>
+      </Position>
+      <FarTopLeft>
+        <X>-478</X>
+        <Y>-250</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>666</X>
+        <Y>504</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+    <Bin Name="Bin 4">
+      <Name>Bin 4</Name>
+      <Position>
+        <Row>
+          <Column>-0.012538053329643873</Column>
+          <Column>-0.9999089085779328</Column>
+          <Column>0.0049971757213593242</Column>
+          <Column>1620</Column>
+        </Row>
+        <Row>
+          <Column>0.99987773198388141</Column>
+          <Column>-0.01258405234516259</Column>
+          <Column>-0.00928238704986186</Column>
+          <Column>-2327.186336217474</Column>
+        </Row>
+        <Row>
+          <Column>0.009344426224880872</Column>
+          <Column>0.0048801816627401145</Column>
+          <Column>0.9999444312187884</Column>
+          <Column>-813.54967378439574</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+        <Rotation>
+          <X>0.0048804141152349228</X>
+          <Y>-0.0093445622201289973</Y>
+          <Z>1.5833352561302383</Z>
+        </Rotation>
+      </Position>
+      <FarTopLeft>
+        <X>-478</X>
+        <Y>-250</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>666</X>
+        <Y>504</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+    <Bin Name="Bin 5">
+      <Name>Bin 5</Name>
+      <Position>
+        <Row>
+          <Column>-0.012538053329643873</Column>
+          <Column>-0.9999089085779328</Column>
+          <Column>0.0049971757213593242</Column>
+          <Column>2442</Column>
+        </Row>
+        <Row>
+          <Column>0.99987773198388141</Column>
+          <Column>-0.01258405234516259</Column>
+          <Column>-0.00928238704986186</Column>
+          <Column>-2327.186336217474</Column>
+        </Row>
+        <Row>
+          <Column>0.009344426224880872</Column>
+          <Column>0.0048801816627401145</Column>
+          <Column>0.9999444312187884</Column>
+          <Column>-813.54967378439574</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+        <Rotation>
+          <X>0.0048804141152349228</X>
+          <Y>-0.0093445622201289973</Y>
+          <Z>1.5833352561302383</Z>
+        </Rotation>
+      </Position>
+      <FarTopLeft>
+        <X>-478</X>
+        <Y>-250</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>666</X>
+        <Y>504</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+    <Bin Name="Bin 6">
+      <Name>Bin 6</Name>
+      <Position>
+        <Row>
+          <Column>1</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>1</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+          <Column>0</Column>
+        </Row>
+        <Row>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>0</Column>
+          <Column>1</Column>
+        </Row>
+      </Position>
+      <FarTopLeft>
+        <X>-600</X>
+        <Y>-400</Y>
+        <Z>0</Z>
+      </FarTopLeft>
+      <NearBottomRight>
+        <X>600</X>
+        <Y>400</Y>
+        <Z>200</Z>
+      </NearBottomRight>
+      <CameraPositionIndex>0</CameraPositionIndex>
+    </Bin>
+  </Bins>
+</World>
