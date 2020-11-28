@@ -13,7 +13,9 @@ How to use CenterNet with your dataset:
 - modify the following file with your dataset's info:
 
     -/CenterNet/src/lib/datasets/dataset_factory.py
+    
     -/CenterNet/src/lib/opts.py
+    
     -/CenterNet/src/lib/utils/debugger.py
 
 #train
