@@ -11,6 +11,7 @@ How to use CenterNet with your dataset:
 - put your data(annotations and images) in the data folder, the annotations file has to be in COCO format. 
 - create a file "my_dataset.py" in CenterNet/src/lib/datasets/dataset/
 - modify the following file with your dataset's info:
+
     -/CenterNet/src/lib/datasets/dataset_factory.py
     -/CenterNet/src/lib/opts.py
     -/CenterNet/src/lib/utils/debugger.py
