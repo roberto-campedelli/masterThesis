@@ -19,6 +19,24 @@
  */
 #define TEST_DEPTH_MAP 0
 
+/*
+"0_apple
+ 1_ball
+ 2_banana
+ 3_battery
+ 4_bottle
+ 5_can
+ 6_chair
+ 7_guitar
+ 8_lighter
+ 9_mug
+ 10_shoe
+ 11_sofa
+ 12_tv
+*/
+
+#define category_id 10
+
 namespace po = boost::program_options;
 using namespace std;
 using namespace cv;
@@ -59,8 +77,136 @@ void applyTfToPoints(cv::Mat& r_vec, cv::Mat& t_vec, std::vector<Point3f>& input
   }
 }
 
+template<typename T> T indexOfTheMin(vector<T> v){
+  T tmp = v[0];
+  int index = 0;
+  for( int i=0; i< v.size(); i++){
+    if(v[i] <= tmp){
+      tmp = v[i];
+      index = i;
+    }
+  }
+  return index;
+}
 
-void printLabel(string image_path, cv::Mat calib, string cat_id,Vec4f bbox,Vec3f dim, Point3f location, double rotation_y, double alpha){
+template<typename T> T indexOfTheMax(vector<T> v){
+  T tmp = v[0];
+  int index = 0;
+  for( int i=0; i< v.size(); i++){
+    if(v[i] >= tmp){
+      tmp = v[i];
+      index = i;
+    }
+  }
+  return index;
+}
+
+ int getTopLeftPointIndex(vector<Point2f> point_vector){
+  vector<float> x_vector(8);
+  vector<float> y_vector(8);
+  for (unsigned int i = 0; i < point_vector.size(); i++)
+  { x_vector[i] = point_vector[i].x;
+    y_vector[i] = point_vector[i].y;  
+  }
+  int index;
+  vector<int> top4index(4);
+  for(int i =0; i < 4; i++){
+    top4index[i] = indexOfTheMin(y_vector);
+    y_vector[top4index[i]] = 2000;
+  }
+  float minx = 2000;
+  for (int i = 0; i < 4; i++)
+    {
+      if(point_vector[top4index[i]].x < minx ){
+          minx = point_vector[top4index[i]].x;
+          index = top4index[i];
+      }
+    }
+      
+  return index;
+}
+
+int getTopRightPointIndex(vector<Point2f> point_vector){
+  vector<float> x_vector(8);
+  vector<float> y_vector(8);
+  for (unsigned int i = 0; i < point_vector.size(); i++)
+  { x_vector[i] = point_vector[i].x;
+    y_vector[i] = point_vector[i].y;  
+  }
+  int index;
+  vector<int> top4index(4);
+  for(int i =0; i < 4; i++){
+    top4index[i] = indexOfTheMin(y_vector);
+    y_vector[top4index[i]] = 2000;
+  }
+  float maxx = 0;
+  for (int i = 0; i < 4; i++)
+    {
+      if(point_vector[top4index[i]].x > maxx ){
+          maxx = point_vector[top4index[i]].x;
+          index = top4index[i];
+      }
+    }
+      
+  return index;
+}
+
+int getBottomLeftPointIndex(vector<Point2f> point_vector){
+  vector<float> x_vector(8);
+  vector<float> y_vector(8);
+  for (unsigned int i = 0; i < point_vector.size(); i++)
+  { x_vector[i] = point_vector[i].x;
+    y_vector[i] = point_vector[i].y;  
+  }  int index;
+  vector<int> top4index(4);
+  for(int i =0; i < 4; i++){
+    top4index[i] = indexOfTheMax(y_vector);
+    y_vector[top4index[i]] = 0;
+  }
+  float minx = 2000;
+  for (int i = 0; i < 4; i++)
+    {
+      if(point_vector[top4index[i]].x < minx ){
+          minx = point_vector[top4index[i]].x;
+          index = top4index[i];
+      }
+    }
+      
+  return index;
+}
+
+//get depth and length --> prendi i 4 punti più in alto (y minore) e prendi più profondo e più vicino(max z e min z)
+
+void getLengthAndDepth(vector<Point3f> point3d, float &length_m, float &depth){
+  vector<float> x_vector(8);
+  vector<float> y_vector(8);
+  for (unsigned int i = 0; i < point3d.size(); i++)
+  { x_vector[i] = point3d[i].x;
+    y_vector[i] = point3d[i].y;  
+  }
+  int index;
+  vector<int> top4index(4);
+  for(int i =0; i < 4; i++){
+    top4index[i] = indexOfTheMin(y_vector);
+    y_vector[top4index[i]] = 2000;
+  }
+  int deepest_point_index = top4index[0];
+  int closest_point_index = top4index[0];
+  for(int i = 1; i < top4index.size(); i++){
+    if(point3d[top4index[i]].z >= point3d[deepest_point_index].z)
+      deepest_point_index = top4index[i];
+    if(point3d[top4index[i]].z < point3d[closest_point_index].z)
+      closest_point_index = top4index[i];
+  }
+
+  //cout << " deepest and closest point : [ " << deepest_point_index << " , " << closest_point_index << " ]" << endl; 
+
+  length_m = point3d[deepest_point_index].z - point3d[closest_point_index].z;
+  depth = point3d[closest_point_index].z + length_m/2;
+}
+
+
+void printLabel(string image_path, cv::Mat calib, int cat_id,Vec4f bbox,Vec3f dim, Point3f location, double rotation_y, double alpha){
 
   boost::filesystem::path pathImg(image_path);
   string file_name = pathImg.filename().string();
@@ -423,15 +569,23 @@ int main(int argc, char **argv)
       applyTfToPoints(r_vec, t_vec, bb_v, bb_v_transformed);
       
       // print 3d vertices in camera frame
-      /*
+      
       cout << "\n3DBBox vertices in camera frame:" << endl;
       for (int i=0; i<bb_v_transformed.size(); ++i)
       {
         cout << "v[" << i << "]: " <<  bb_v_transformed[i].x << " " << bb_v_transformed[i].y << " " << bb_v_transformed[i].z << endl;
       }
       cout << endl;
-      */
 
+
+     /* 
+      cout << "\n3DBBox vertices in obj frame:" << endl;
+      for (int i=0; i<bb_v_transformed.size(); ++i)
+      {
+        cout << "v[" << i << "]: " <<  bb_v[i].x << " " << bb_v[i].y << " " << bb_v[i].z << endl;
+      }
+      cout << endl;
+      */
       
       // print 3d vertices in image frame
       /*
@@ -442,33 +596,74 @@ int main(int argc, char **argv)
       cout << endl;
       */
 
+
       //2D bounding box of object in the image (0-based index):
       //contains left, top, right, bottom pixel coordinates
+      //topLeft point = (lowest x, lowest y)
+      //bottomLeft point = (lowest x, highest y)
+      //topRight point  =  (highest x, lowest y)
+      
+      /*   
+      vector<float> proj_bb_pts_x (8);
+      vector<float> proj_bb_pts_y (8);
 
-      const cv::Vec4f bb2d ( proj_bb_pts[0].x, proj_bb_pts[0].y, proj_bb_pts[1].x - proj_bb_pts[0].x, proj_bb_pts[3].y - proj_bb_pts[0].y); 
+      for (unsigned int i = 0; i < proj_bb_pts.size(); i++)
+      { proj_bb_pts_x[i] = proj_bb_pts[i].x;
+        proj_bb_pts_y[i] = proj_bb_pts[i].y;  
+      }
+      
+      for (int i = 0; i < proj_bb_pts.size(); i++){
+      cout << " v["<<i<<"].x =" << proj_bb_pts_x[i] << endl;
+      }
+      
+      for (int i = 0; i < proj_bb_pts.size(); i++){
+      cout << " v["<<i<<"].y =" << proj_bb_pts_y[i] << endl;
+      }
+      */
+      
+      //among the 4 point with the lowest y i take the lowest x (tofleft) and the highest x (bottomleft)
+      //among the 4 point with the lowest x i take the highest y (topRight)
+   
+      int topLeft = getTopLeftPointIndex(proj_bb_pts);
+      int bottomLeft = getBottomLeftPointIndex(proj_bb_pts);
+      int topRight = getTopRightPointIndex(proj_bb_pts);
 
-      cout << "\n2dbbox coordinates(left, top, right, bottom) = " << bb2d << endl;
+      cout << "top left point" << topLeft << endl;
+      cout << "bottom left point" << bottomLeft << endl;
+      cout << "top right point" << topRight << endl;
 
+      float width_px = sqrt(pow(proj_bb_pts[topRight].x - proj_bb_pts[topLeft].x, 2) +  pow(proj_bb_pts[topRight].y - proj_bb_pts[topLeft].y, 2));
+      float height_px = sqrt(pow(proj_bb_pts[bottomLeft].y - proj_bb_pts[topLeft].y, 2) + pow(proj_bb_pts[bottomLeft].x - proj_bb_pts[topLeft].x, 2));
 
-      //3D object dimensions: height, width, length (in meters)
+      //cout << " width px " << width_px << endl;
+      //cout << "height px " << height_px << endl;
+    
+      const cv::Vec4f bb2d ( proj_bb_pts[topLeft].x, proj_bb_pts[topLeft].y, width_px, height_px); 
 
-      float width = abs(bb_v_transformed[0].x - bb_v_transformed[1].x);
-      float height = abs(bb_v_transformed[0].y - bb_v_transformed[3].y);
-      float depth = abs(bb_v_transformed[0].z - bb_v_transformed[4].z);
+      cout << "\n2dbbox coordinates(topLeft x, topleft y, width, height) = " << bb2d << endl;
 
-      //cout << "height = " << height << endl;
-      //cout << "width = " << width << endl;
-      //cout << "depth = " << depth << endl;
+      cout << "\n points 2d\n" << proj_bb_pts << endl;
 
-      cv::Vec3f dim (height, width, depth);    
+      //box dimension in meters
+      float width_m = sqrt(pow(bb_v_transformed[topRight].x - bb_v_transformed[topLeft].x, 2) +  pow(bb_v_transformed[topRight].y - bb_v_transformed[topLeft].y, 2));
+      float height_m = sqrt(pow(bb_v_transformed[bottomLeft].y - bb_v_transformed[topLeft].y, 2) + pow(bb_v_transformed[bottomLeft].x - bb_v_transformed[topLeft].x, 2));
+
+      float length_m;
+
+      float depth;
+
+      //i retrieve length and depth in meters
+      getLengthAndDepth(bb_v_transformed, length_m, depth);
+
+      cv::Vec3f dim (height_m, width_m, length_m);    
       cout << "\n3dbb dimension(h, w, d) = " << dim << endl;
 
-      //3D object location x,y,z in camera coordinates (in meters)
+      //3D object center location x,y,z in camera coordinates (in meters)
 
       Point3f center3bbox;
-      center3bbox.x = bb_v_transformed[0].x + width/2.0;
-      center3bbox.y = bb_v_transformed[0].y + height/2.0;
-      center3bbox.z = bb_v_transformed[0].z + depth/2.0;
+      center3bbox.x = bb_v_transformed[topLeft].x + width_m/2.0;
+      center3bbox.y = bb_v_transformed[topLeft].y + height_m/2.0;
+      center3bbox.z = depth;
       cout << "\ncenter 3bbox = " << center3bbox << endl;
 
       //get camera matrix
@@ -478,22 +673,41 @@ int main(int argc, char **argv)
       //get tf matrix
       cv::Mat tf_mat;
       cv_ext::exp2TransfMat<float>(r_vec, t_vec, tf_mat);
+
+      //get rotation matrix
+      Mat r_mat;
+      cv_ext::angleAxis2RotMat<float>(r_vec, r_mat);
     
       //cout << "r_vec = " << r_vec << endl;
       //cout << "t_vec = " << t_vec << endl;
       //cout << "tf_mat = " << tf_mat << endl;
+      //cout << "r_mat = " << r_mat << endl;
+
 
       // rotation on axis y
       double rotation_y = r_vec.at<double>(1,0);
-      cout << "\nrotation y = " << rotation_y << endl;
+      //cout << "\nrotation y = " << rotation_y << endl;
+
+      //normalize rotation_y in [-pi, pi]
+      double normalizedRotation_y = rotation_y;
+      if (normalizedRotation_y > CV_PI)
+         normalizedRotation_y -= 2 * CV_PI;
+      if (normalizedRotation_y < - CV_PI)
+         normalizedRotation_y+= 2 * CV_PI;
+      cout << "normalized rotation y = " << normalizedRotation_y << endl;  
 
 
       // calculation of the projection matrix
       Mat small_tf_mat;
       tf_mat(Range(0, tf_mat.rows -1), Range(0, tf_mat.cols)).copyTo(small_tf_mat);
       small_tf_mat.convertTo(small_tf_mat, 6);
-      Mat projectMatrix = cameraMatrix*small_tf_mat;
-      cout << "\nprojection Matrix = " << projectMatrix << endl;
+      //cout << "small_tf_mat = " << small_tf_mat << endl;
+
+      //Mat projectMatrix = cameraMatrix*small_tf_mat;
+      Mat projectMatrix;
+      Mat zeroVector = (Mat_<double>(3,1) << 0, 0, 0);
+      hconcat(cameraMatrix, zeroVector, projectMatrix);
+      //cout << "\nprojection Matrix = " << projectMatrix << endl;
 
       //calculation of alpha - object angle
       float x_center_pixel = proj_bb_pts[0].x + (proj_bb_pts[1].x - proj_bb_pts[0].x)/2;
@@ -507,20 +721,18 @@ int main(int argc, char **argv)
       cout << endl;
       cout << endl;
 
-      cout << "categories = " << "0_apple - 1_ball - 2_banana - 3_battery - 4_bottle - 5_can - 6_chair -"
-                               << "7_guitar - 8_lighter - 9_mug -10_shoe -11_sofa -12_tv" << endl;
+      //cout << "categories = " << "0_apple - 1_ball - 2_banana - 3_battery - 4_bottle - 5_can - 6_chair -"
+      //                         << "7_guitar - 8_lighter - 9_mug -10_shoe -11_sofa -12_tv" << endl;
  
  
      
-
-
       //print info for labeling 
       if(print_info){
 
-        string category_id;
-        cout << "Insert category = " << endl;
-        cin >> category_id;
-        printLabel(image_filename, projectMatrix, category_id ,bb2d,  dim, center3bbox, rotation_y, alpha );
+        //string category_id;
+        //cout << "Insert category = " << endl;
+        //cin >> category_id;
+        printLabel(image_filename, projectMatrix, category_id ,bb2d,  dim, center3bbox, normalizedRotation_y, alpha );
 
       }   
       
