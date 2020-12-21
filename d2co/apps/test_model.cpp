@@ -35,7 +35,7 @@
  12_tv
 */
 
-#define category_id 10
+#define category_id 0
 
 namespace po = boost::program_options;
 using namespace std;
@@ -201,6 +201,8 @@ void getLengthAndDepth(vector<Point3f> point3d, float &length_m, float &depth){
 
   //cout << " deepest and closest point : [ " << deepest_point_index << " , " << closest_point_index << " ]" << endl; 
 
+
+  //length_m = sqrt(pow(point3d[deepest_point_index].z - point3d[closest_point_index].z, 2) + pow(point3d[deepest_point_index].y - point3d[closest_point_index].y, 2));
   length_m = point3d[deepest_point_index].z - point3d[closest_point_index].z;
   depth = point3d[closest_point_index].z + length_m/2;
 }
@@ -565,11 +567,20 @@ int main(int argc, char **argv)
       // retrieve bbox 3d points in obj ref. frame
       std::vector<Point3f> bb_v, bb_v_transformed;
       obj_model.getBoundingBox().vertices(bb_v);
+      
+      float width_model = obj_model.getBoundingBox().width;
+      float height_model =obj_model.getBoundingBox().height;
+      float depth_model = obj_model.getBoundingBox().depth;
+      
+      cout << "width model = " << width_model << endl;
+      cout << "height model = " << height_model << endl;
+      cout << "length model = " << depth_model << endl; 
+      
       // transform 3dbbox points into camera frame
       applyTfToPoints(r_vec, t_vec, bb_v, bb_v_transformed);
       
       // print 3d vertices in camera frame
-      
+      /*
       cout << "\n3DBBox vertices in camera frame:" << endl;
       for (int i=0; i<bb_v_transformed.size(); ++i)
       {
@@ -577,7 +588,7 @@ int main(int argc, char **argv)
       }
       cout << endl;
 
-
+*/
      /* 
       cout << "\n3DBBox vertices in obj frame:" << endl;
       for (int i=0; i<bb_v_transformed.size(); ++i)
@@ -628,21 +639,44 @@ int main(int argc, char **argv)
       int bottomLeft = getBottomLeftPointIndex(proj_bb_pts);
       int topRight = getTopRightPointIndex(proj_bb_pts);
 
-      cout << "top left point" << topLeft << endl;
-      cout << "bottom left point" << bottomLeft << endl;
-      cout << "top right point" << topRight << endl;
+      cout << "//////////////\ntop left point [blue] : " << topLeft << endl;
+      cout << "bottom left point [black] : " << bottomLeft << endl;
+      cout << "top right point [green] :" << topRight << endl;
+      cout << "/////////////////" << endl;
 
       float width_px = sqrt(pow(proj_bb_pts[topRight].x - proj_bb_pts[topLeft].x, 2) +  pow(proj_bb_pts[topRight].y - proj_bb_pts[topLeft].y, 2));
       float height_px = sqrt(pow(proj_bb_pts[bottomLeft].y - proj_bb_pts[topLeft].y, 2) + pow(proj_bb_pts[bottomLeft].x - proj_bb_pts[topLeft].x, 2));
 
       //cout << " width px " << width_px << endl;
       //cout << "height px " << height_px << endl;
-    
+
       const cv::Vec4f bb2d ( proj_bb_pts[topLeft].x, proj_bb_pts[topLeft].y, width_px, height_px); 
 
       cout << "\n2dbbox coordinates(topLeft x, topleft y, width, height) = " << bb2d << endl;
 
-      cout << "\n points 2d\n" << proj_bb_pts << endl;
+      //cout << "\n points 2d\n" << proj_bb_pts << endl;
+
+
+    
+
+      Point2f center2d;
+      center2d.x = proj_bb_pts[topLeft].x + width_px/2.0;
+      center2d.y = proj_bb_pts[topLeft].y + height_px/2.0;
+      //i draw blue point on top left and on the center
+      vector<Point2f> blue_points;
+      blue_points.push_back(proj_bb_pts[topLeft]);
+      blue_points.push_back(center2d);
+      cv_ext::drawCircles(draw_img, blue_points, 2, Scalar(255, 0, 0) );
+
+      vector<Point2f> green_points;
+      green_points.push_back(proj_bb_pts[topRight]);
+      cv_ext::drawCircles(draw_img, green_points, 2, Scalar(0, 255, 0) );
+
+      vector<Point2f> black_points;
+      black_points.push_back(proj_bb_pts[bottomLeft]);
+      cv_ext::drawCircles(draw_img, black_points, 2, Scalar(0, 0, 0) );
+      
+
 
       //box dimension in meters
       float width_m = sqrt(pow(bb_v_transformed[topRight].x - bb_v_transformed[topLeft].x, 2) +  pow(bb_v_transformed[topRight].y - bb_v_transformed[topLeft].y, 2));
@@ -664,6 +698,8 @@ int main(int argc, char **argv)
       center3bbox.x = bb_v_transformed[topLeft].x + width_m/2.0;
       center3bbox.y = bb_v_transformed[topLeft].y + height_m/2.0;
       center3bbox.z = depth;
+      //cv_ext::drawCircles(draw_img, center3bbox, 2, Scalar(0, 0, 255) );
+
       cout << "\ncenter 3bbox = " << center3bbox << endl;
 
       //get camera matrix
@@ -698,12 +734,13 @@ int main(int argc, char **argv)
 
 
       // calculation of the projection matrix
-      Mat small_tf_mat;
-      tf_mat(Range(0, tf_mat.rows -1), Range(0, tf_mat.cols)).copyTo(small_tf_mat);
-      small_tf_mat.convertTo(small_tf_mat, 6);
+      //Mat small_tf_mat;
+      //tf_mat(Range(0, tf_mat.rows -1), Range(0, tf_mat.cols)).copyTo(small_tf_mat);
+      //small_tf_mat.convertTo(small_tf_mat, 6);
       //cout << "small_tf_mat = " << small_tf_mat << endl;
 
       //Mat projectMatrix = cameraMatrix*small_tf_mat;
+
       Mat projectMatrix;
       Mat zeroVector = (Mat_<double>(3,1) << 0, 0, 0);
       hconcat(cameraMatrix, zeroVector, projectMatrix);
