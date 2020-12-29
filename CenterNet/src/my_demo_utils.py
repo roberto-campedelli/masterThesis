@@ -50,8 +50,14 @@ def getMultipleGtAnnotation(filePath, image_id):
             rotation_y = float(findBetween(annotation, "\"rotation_y\":", "}"))
 
             gt_annotations = [cat_id, dim, bbox, alpha, location, rotation_y]
+            ############################### KITTI ###########
             #i put all the gt annotations of the image in a list
-            gt_ann_list.append(gt_annotations)
+            if(cat_id == 4 or cat_id == 5 or cat_id == 7 or cat_id == 8):
+                cat_id = 2
+            if(cat_id == 6):
+                cat_id = 1    
+            if(cat_id != 9):
+                gt_ann_list.append(gt_annotations)
     return gt_ann_list
 
 def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative, not_detected):
@@ -59,13 +65,13 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
     not_detected = not_detected + abs(len(gt_ann_list) - len(det_ann_list))
     
     #for each element of the gt list i compare it with the closest in the det list, minimizing the distance of the centers
-    min_loc_err = 1000
     right_det_element = det_ann_list[0]
     index_right_element = 0
     num_detection = 0
     tot_vol_err, tot_loc_err, tot_rot_err, tot_iou = float(0), float(0), float(0), float(0)
 
     for gt_element in gt_ann_list :
+        min_loc_err = 1000
         if len(det_ann_list) <= 0:
             break
         for det_element in det_ann_list:
@@ -74,12 +80,17 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
                 min_loc_err = center_diff
                 right_det_element = det_element
                 index_right_element = det_ann_list.index(det_element)
+        #print(index_right_element)
         #det_ann_list.remove(right_det_element)
+        print("i remove element = " + str(right_det_element) + "of index " + str(index_right_element))
         det_ann_list.pop(index_right_element)
         num_detection = num_detection + 1
         vol_err, location_err, rot_err, iou = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative)
         tot_vol_err, tot_loc_err, tot_rot_err, tot_iou =  tot_vol_err + vol_err, tot_loc_err + location_err, tot_rot_err + rot_err, tot_iou + iou
-    
+    #for avoiding /0 error
+    if num_detection == 0:
+        num_detection = 1
+
     return  tot_vol_err/float(num_detection), tot_loc_err/float(num_detection), tot_rot_err/float(num_detection), tot_iou/float(num_detection)            
 
 

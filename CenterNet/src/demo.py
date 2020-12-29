@@ -18,8 +18,8 @@ video_ext = ['mp4', 'mov', 'avi', 'mkv']
 time_stats = ['tot', 'load', 'pre', 'net', 'dec', 'post', 'merge']
 
 #annotation file path
-ann_file_path = "../data/my_dataset/annotations/annotations_3dop_train.json"
-#ann_file_path = "../data/new_kitti.json"
+#ann_file_path = "../data/my_dataset/annotations/annotations_3dop_train.json"
+ann_file_path = "../data/new_kitti.json"
 
 
 #initialize list for storing TP, FP and FN for each category
@@ -70,25 +70,30 @@ def demo(opt):
     for (image_name) in image_names:
 
       #image id for my dataset
-      image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
+      #image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
 
       #image id for kitti
-      #image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
+      image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
       #i cut the zero from the beginning of the image name   
-      #while(image_id.startswith("0") and len(image_id) > 1):
-      #  image_id = image_id[1:]
+      while(image_id.startswith("0") and len(image_id) > 1):
+        image_id = image_id[1:]
           
       print("image id =  " + str(image_id))
 
       ret = detector.run(image_name)
       res = ret['results']
       #for multiple objet per image
-      print(res)
+      #print(res)
       det_ann = getMultipleDetAnnotation(res)
-      print("detection annotation list = " + str(det_ann))
-      print("det elements = " + str(len(det_ann)))
       gt_ann = getMultipleGtAnnotation(ann_file_path, image_id)
+      if(len(gt_ann) <= 0):
+        print("ground truth of the image not found")
+        continue
+
+      print("det elements = " + str(len(det_ann)))
       print("gt elements = " + str(len(gt_ann)))
+
+      print("detection annotation list = " + str(det_ann))
       print("groung truth annotation list = " + str(gt_ann))
       vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, not_detected)
 
@@ -115,7 +120,6 @@ def demo(opt):
       #print("TP = " + str(true_positive))
       #print("FP = " + str(false_positive))
       #print("FN = " + str(false_negative))
-
 
       time_str = ''
       for stat in time_stats:
