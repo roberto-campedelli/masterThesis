@@ -23,11 +23,10 @@ ann_file_path = "../data/new_kitti.json"
 
 
 #initialize list for storing TP, FP and FN for each category
-num_cat = 10
+num_cat = 3
 true_positive = [0] * (num_cat +1) 
 false_negative = [0] * (num_cat +1)
 false_positive = [0] * (num_cat +1)
-not_detected = 0
 
 #define the lists for storing the errors 
 vol_errors = []
@@ -93,9 +92,13 @@ def demo(opt):
       print("det elements = " + str(len(det_ann)))
       print("gt elements = " + str(len(gt_ann)))
 
-      print("detection annotation list = " + str(det_ann))
-      print("groung truth annotation list = " + str(gt_ann))
-      vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, not_detected)
+      print("detection annotation list = ")
+      for _ in det_ann:
+        print(str(_) + "\n")
+      print("groung truth annotation list = ")
+      for _ in gt_ann:
+        print(str(_) + "\n")
+      vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative)
 
 
       #for single object per image
@@ -107,7 +110,7 @@ def demo(opt):
             
       #vol_err, loc_err, rot_err, iou = getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative)
       
-      #vol_errors.append(vol_err)
+      vol_errors.append(vol_err)
       #loc_errors.append(loc_err)
       #rot_errors.append(rot_err)
       #iou_errors.append(iou)
@@ -116,17 +119,18 @@ def demo(opt):
       print("Location error = " + str(loc_err))
       print("Rotation error = "+ str(rot_err))
       print("IoU = "+ str(iou))
-
-      #print("TP = " + str(true_positive))
-      #print("FP = " + str(false_positive))
-      #print("FN = " + str(false_negative))
+      print("TP = " + str(true_positive))
+      print("FP = " + str(false_positive))
+      print("FN = " + str(false_negative))
 
       time_str = ''
       for stat in time_stats:
         time_str = time_str + '{} {:.3f}s |'.format(stat, ret[stat])
       print(time_str)
-    
-  #print("Volume error = " + str(vol_errors))
+  
+  vol_errors_np = (np.array(vol_errors) - min(vol_errors))/float(max(vol_errors) - min(vol_errors))
+  total_vol_error = np.sum(vol_errors_np) / vol_errors_np.size
+  print("Total Volume error = " + str(total_vol_error))
   #print("Location error = " + str(loc_errors))
   #print("Rotation error = " + str(rot_errors))
   #print("IoU = " + str(iou_errors))

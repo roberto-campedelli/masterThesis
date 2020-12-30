@@ -48,21 +48,21 @@ def getMultipleGtAnnotation(filePath, image_id):
             alpha = float(findBetween(annotation, "\"alpha\":", "\"truncated\":")[:-1])
             location = list(map(float,findBetween(annotation, "\"location\":", "\"rotation_y\":")[1:-2].split(", ")))
             rotation_y = float(findBetween(annotation, "\"rotation_y\":", "}"))
-
-            gt_annotations = [cat_id, dim, bbox, alpha, location, rotation_y]
+            
             ############################### KITTI ###########
             #i put all the gt annotations of the image in a list
             if(cat_id == 4 or cat_id == 5 or cat_id == 7 or cat_id == 8):
                 cat_id = 2
             if(cat_id == 6):
                 cat_id = 1    
+            
+            gt_annotations = [cat_id, dim, bbox, alpha, location, rotation_y]
+        
             if(cat_id != 9):
                 gt_ann_list.append(gt_annotations)
     return gt_ann_list
 
-def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative, not_detected):
-    #the differece between the gt list and the det list are object not detected
-    not_detected = not_detected + abs(len(gt_ann_list) - len(det_ann_list))
+def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative):
     
     #for each element of the gt list i compare it with the closest in the det list, minimizing the distance of the centers
     right_det_element = det_ann_list[0]
@@ -87,6 +87,13 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
         num_detection = num_detection + 1
         vol_err, location_err, rot_err, iou = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative)
         tot_vol_err, tot_loc_err, tot_rot_err, tot_iou =  tot_vol_err + vol_err, tot_loc_err + location_err, tot_rot_err + rot_err, tot_iou + iou
+    
+    #if det ann list is  not empty means that is detected something that is not in the gt, and this means a 
+    #false positive for the category of the object detected
+    while det_ann_list :
+        cat_det_wrong = det_ann_list.pop()[0]
+        false_positive[cat_det_wrong] = false_positive[cat_det_wrong] + 1
+    
     #for avoiding /0 error
     if num_detection == 0:
         num_detection = 1
@@ -161,9 +168,25 @@ def getIoU(det_bbox, gt_bbox):
   bl_int_y = min(det_bbox[1] + det_bbox[3], gt_bbox[1] + gt_bbox[3])
 
   int_area = (tr_int_x - tl_int_x)*(bl_int_y - tl_int_y)
+  if int_area < 0:
+    int_area = 0
+        
   union_area = (det_bbox[2] * det_bbox[3]) + (gt_bbox[2] * gt_bbox[3]) - int_area
 
   iou = int_area / float(union_area)
+  if iou < 0:
+      print("ATTENZIONEEEEEEEEEEE")
+      print(det_bbox)
+      print(gt_bbox)
+      print("INT AREA = " +str(int_area))
+      print("UNION AREA = " +str(union_area))
+      print("IOU = " +str(iou))
+      print("tl int = [" +str(tl_int_x) + ", " + str(tl_int_y) + "]")
+      print("tr int = [" +str(tr_int_x) + ", " + str(tl_int_y) + "]")
+      print("bl int = [" +str(tl_int_x) + ", " + str(bl_int_y) + "]")
+
+
+
 
   return iou
 
