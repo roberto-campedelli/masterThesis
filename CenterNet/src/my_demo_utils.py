@@ -62,8 +62,11 @@ def getMultipleGtAnnotation(filePath, image_id):
                 gt_ann_list.append(gt_annotations)
     return gt_ann_list
 
-def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative):
+def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative, tp_fp_fn_det):
     
+    if(len(gt_ann_list) > len(det_ann_list)):
+        tp_fp_fn_det[2] = tp_fp_fn_det[2] + (len(gt_ann_list) - len(det_ann_list))
+
     #for each element of the gt list i compare it with the closest in the det list, minimizing the distance of the centers
     right_det_element = det_ann_list[0]
     index_right_element = 0
@@ -82,10 +85,10 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
                 index_right_element = det_ann_list.index(det_element)
         #print(index_right_element)
         #det_ann_list.remove(right_det_element)
-        print("i remove element = " + str(right_det_element) + "of index " + str(index_right_element))
+        #print("i remove element = " + str(right_det_element) + "of index " + str(index_right_element))
         det_ann_list.pop(index_right_element)
         num_detection = num_detection + 1
-        vol_err, location_err, rot_err, iou = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative)
+        vol_err, location_err, rot_err, iou = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative, tp_fp_fn_det)
         tot_vol_err, tot_loc_err, tot_rot_err, tot_iou =  tot_vol_err + vol_err, tot_loc_err + location_err, tot_rot_err + rot_err, tot_iou + iou
     
     #if det ann list is  not empty means that is detected something that is not in the gt, and this means a 
@@ -158,7 +161,7 @@ def getGtAnnotation(filePath, image_id):
 
 #calculation of the IoU of the front face of the bbox 3d
 #the bbox2d is defined as [topLeft.x, topLeft.y, topRight.x - topLeft.x, bottomRight.y - topLeft.y]
-def getIoU(det_bbox, gt_bbox):
+def getIoU(det_bbox, gt_bbox, tp_fp_fn_det):
   #top left point of the intersaction square
   tl_int_x = max(det_bbox[0], gt_bbox[0])
   tl_int_y = max(det_bbox[1], gt_bbox[1])
@@ -174,26 +177,18 @@ def getIoU(det_bbox, gt_bbox):
   union_area = (det_bbox[2] * det_bbox[3]) + (gt_bbox[2] * gt_bbox[3]) - int_area
 
   iou = int_area / float(union_area)
-  if iou < 0:
-      print("ATTENZIONEEEEEEEEEEE")
-      print(det_bbox)
-      print(gt_bbox)
-      print("INT AREA = " +str(int_area))
-      print("UNION AREA = " +str(union_area))
-      print("IOU = " +str(iou))
-      print("tl int = [" +str(tl_int_x) + ", " + str(tl_int_y) + "]")
-      print("tr int = [" +str(tr_int_x) + ", " + str(tl_int_y) + "]")
-      print("bl int = [" +str(tl_int_x) + ", " + str(bl_int_y) + "]")
 
-
-
+  if iou > 0.5:
+      tp_fp_fn_det[0] = tp_fp_fn_det[0] + 1
+  else:
+      tp_fp_fn_det[1] = tp_fp_fn_det[1] + 1
 
   return iou
 
 
 #calculate statistics between ground truth and detection
 #annotation order = [cat_id, dim, bbox, alpha, location, rotation_y]
-def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative):
+def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative, tp_fp_fn_det):
   gt_cat_id = gt_annotation[0]
   gt_dim = gt_annotation[1]
   gt_bbox = gt_annotation[2]
@@ -219,7 +214,7 @@ def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, 
   vol_err = abs(det_vol - gt_vol)
 
   #check IoU of the front face of the 3dbbox
-  iou = getIoU(det_bbox, gt_bbox)
+  iou = getIoU(det_bbox, gt_bbox, tp_fp_fn_det)
 
   #check the location of the center of the 3dbbox error using the euclidean distance
   location_err = np.linalg.norm(np.array(gt_location) - np.array(det_location))

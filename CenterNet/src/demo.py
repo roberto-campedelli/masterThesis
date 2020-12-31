@@ -28,6 +28,9 @@ true_positive = [0] * (num_cat +1)
 false_negative = [0] * (num_cat +1)
 false_positive = [0] * (num_cat +1)
 
+#same thing for the detection
+tp_fp_fn_det = [0, 0, 0]
+
 #define the lists for storing the errors 
 vol_errors = []
 iou_errors = []
@@ -71,7 +74,7 @@ def demo(opt):
       #image id for my dataset
       #image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
 
-      #image id for kitti
+      #image id for KITTI
       image_id = image_name[image_name.rfind('/') + 1: image_name.rfind('.')]
       #i cut the zero from the beginning of the image name   
       while(image_id.startswith("0") and len(image_id) > 1):
@@ -85,22 +88,29 @@ def demo(opt):
       #print(res)
       det_ann = getMultipleDetAnnotation(res)
       gt_ann = getMultipleGtAnnotation(ann_file_path, image_id)
+
       if(len(gt_ann) <= 0):
         print("ground truth of the image not found")
         continue
-
+        
+      #i print the number of object detected and the number of object in the ground truth
       print("det elements = " + str(len(det_ann)))
       print("gt elements = " + str(len(gt_ann)))
 
+      '''
+      #i print the detected and the ground truth elements
       print("detection annotation list = ")
       for _ in det_ann:
         print(str(_) + "\n")
       print("groung truth annotation list = ")
       for _ in gt_ann:
         print(str(_) + "\n")
-      vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative)
+      '''
+      
+      #i get the statistics of the image. The mean of the statistics of each object in the image
+      vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, tp_fp_fn_det)
 
-
+      ############################## OLD CODE - for detecting just one element at time
       #for single object per image
       #gt_annotation = getGtAnnotation(ann_file_path, image_id)
       #det_annotation = getDetAnnotation(res)
@@ -109,35 +119,59 @@ def demo(opt):
       #print("det_annotations = " +str(det_annotation))
             
       #vol_err, loc_err, rot_err, iou = getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative)
-      
+      ################################
+
+      #i create an array with all the parameters for each image
       vol_errors.append(vol_err)
-      #loc_errors.append(loc_err)
-      #rot_errors.append(rot_err)
-      #iou_errors.append(iou)
+      loc_errors.append(loc_err)
+      rot_errors.append(rot_err)
+      iou_errors.append(iou)
       
-      print("Volume error = " + str(vol_err))
-      print("Location error = " + str(loc_err))
-      print("Rotation error = "+ str(rot_err))
-      print("IoU = "+ str(iou))
-      print("TP = " + str(true_positive))
-      print("FP = " + str(false_positive))
-      print("FN = " + str(false_negative))
+      #print("Volume error = " + str(vol_err))
+      #print("Location error = " + str(loc_err))
+      #print("Rotation error = "+ str(rot_err))
+      #print("IoU = "+ str(iou))
+     
 
       time_str = ''
       for stat in time_stats:
         time_str = time_str + '{} {:.3f}s |'.format(stat, ret[stat])
       print(time_str)
-  
+
+  #TODO
+  #calculate the mean or some others stats of the array cumulatives of all the error value
   vol_errors_np = (np.array(vol_errors) - min(vol_errors))/float(max(vol_errors) - min(vol_errors))
   total_vol_error = np.sum(vol_errors_np) / vol_errors_np.size
+
+  rot_errors_np = (np.array(rot_errors) - min(rot_errors))/float(max(rot_errors) - min(rot_errors))
+  total_rot_error = np.sum(rot_errors_np) / vol_errors_np.size
+
+  loc_errors_np = (np.array(loc_errors) - min(loc_errors))/float(max(loc_errors) - min(loc_errors))
+  total_loc_error = np.sum(loc_errors_np) / loc_errors_np.size
+
+  total_iou = np.sum(np.array(iou_errors)) / len(iou_errors)
+
+  print(vol_errors_np.size)
+  print(rot_errors_np.size)
+  print(loc_errors_np.size)
+  print(len(iou_errors))
+
   print("Total Volume error = " + str(total_vol_error))
-  #print("Location error = " + str(loc_errors))
-  #print("Rotation error = " + str(rot_errors))
-  #print("IoU = " + str(iou_errors))
+  print("Location error = " + str(total_loc_error))
+  print("Rotation error = " + str(total_rot_error))
+  print("IoU = " + str(total_iou))
+
+  print("TP = " + str(true_positive))
+  print("FP = " + str(false_positive))
+  print("FN = " + str(false_negative))
+
+  print("TP - FP - FN detection = " + str(tp_fp_fn_det))
+
 
   for i in range(1, num_cat + 1):
     print("Precision cat " + str(i) + " = " + str(getPrecisionPerCat(i, true_positive, false_positive)))
-  
+  for i in range(1, num_cat + 1):
+    print("Recall cat " + str(i) + " = " + str(getRecallPerCat(i, true_positive, false_negative)))
 
   #get overall precision and recall
   precision = 0
@@ -146,11 +180,18 @@ def demo(opt):
     precision = precision + getPrecisionPerCat(i, true_positive, false_positive)
     recall = recall + getRecallPerCat(i, true_positive, false_negative)
   
-  #precision = precision/float(num_cat)
-  #recall = recall/float(num_cat)
+  precision = precision/float(num_cat)
+  recall = recall/float(num_cat)
 
-  #print("precision = " + str(precision))
-  #print("recall = " + str(recall))
+  print("precision classification = " + str(precision))
+  print("recall classification= " + str(recall))
+
+  precision_detection = tp_fp_fn_det[0]/float(tp_fp_fn_det[0] + tp_fp_fn_det[1])
+  recall_detection = tp_fp_fn_det[0]/float(tp_fp_fn_det[0] + tp_fp_fn_det[2])
+
+  print("precision detection = " + str(precision_detection))
+  print("recall detection = " + str(recall_detection))
+
 
     
 
