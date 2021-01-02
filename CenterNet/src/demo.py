@@ -31,11 +31,16 @@ false_positive = [0] * (num_cat +1)
 #same thing for the detection
 tp_fp_fn_det = [0, 0, 0]
 
+#array for saving TP and FP for each 3dbbox parameter
+#dim_loc_rot_tpfp = [tp_dim, fp_dim, tp_loc, fp_loc, tp_rot, fp_rot]
+dim_loc_rot_tpfp = [0, 0, 0, 0, 0, 0]
+
 #define the lists for storing the errors 
 vol_errors = []
 iou_errors = []
 rot_errors = []
 loc_errors = []
+dim_errors = []
 
 def demo(opt):
   os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
@@ -108,7 +113,8 @@ def demo(opt):
       '''
       
       #i get the statistics of the image. The mean of the statistics of each object in the image
-      vol_err, loc_err, rot_err, iou = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, tp_fp_fn_det)
+      vol_err, loc_err, rot_err, iou, dim_err = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfp)
+
 
       ############################## OLD CODE - for detecting just one element at time
       #for single object per image
@@ -125,6 +131,7 @@ def demo(opt):
       vol_errors.append(vol_err)
       loc_errors.append(loc_err)
       rot_errors.append(rot_err)
+      dim_errors.append(dim_err)
       iou_errors.append(iou)
       
       #print("Volume error = " + str(vol_err))
@@ -138,7 +145,8 @@ def demo(opt):
         time_str = time_str + '{} {:.3f}s |'.format(stat, ret[stat])
       print(time_str)
 
-  #TODO
+  
+
   #calculate the mean or some others stats of the array cumulatives of all the error value
   vol_errors_np = (np.array(vol_errors) - min(vol_errors))/float(max(vol_errors) - min(vol_errors))
   total_vol_error = np.sum(vol_errors_np) / vol_errors_np.size
@@ -151,21 +159,27 @@ def demo(opt):
 
   total_iou = np.sum(np.array(iou_errors)) / len(iou_errors)
 
-  print(vol_errors_np.size)
-  print(rot_errors_np.size)
-  print(loc_errors_np.size)
-  print(len(iou_errors))
+  #print(vol_errors_np.size)
+  #print(rot_errors_np.size)
+  #print(loc_errors_np.size)
+  #print(len(iou_errors))
 
   print("Total Volume error = " + str(total_vol_error))
   print("Location error = " + str(total_loc_error))
   print("Rotation error = " + str(total_rot_error))
-  print("IoU = " + str(total_iou))
+  #print("IoU = " + str(total_iou))
 
-  print("TP = " + str(true_positive))
-  print("FP = " + str(false_positive))
-  print("FN = " + str(false_negative))
+  #print("classification TP = " + str(true_positive))
+  #print("classification FP = " + str(false_positive))
+  #print("classification FN = " + str(false_negative))
 
-  print("TP - FP - FN detection = " + str(tp_fp_fn_det))
+  #print("detection TP - FP - FN = " + str(tp_fp_fn_det))
+
+  #print("dim_loc_rot_tpfp = " + str(dim_loc_rot_tpfp))
+
+  print("dimension precision = " + str(getPrecision(dim_loc_rot_tpfp[0], dim_loc_rot_tpfp[1])))
+  print("location precision = " + str(getPrecision(dim_loc_rot_tpfp[2], dim_loc_rot_tpfp[3])))
+  print("rotation precision = " + str(getPrecision(dim_loc_rot_tpfp[4], dim_loc_rot_tpfp[5])))
 
 
   for i in range(1, num_cat + 1):

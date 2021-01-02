@@ -1,5 +1,9 @@
 import numpy as np
 
+dim_threshold = 0.8
+loc_threshold = 0.8
+rot_threshold = 0.8
+
 def getMultipleDetAnnotation(res):
     #define a list for storing all the detection for the image
     det_ann_list = []
@@ -62,7 +66,7 @@ def getMultipleGtAnnotation(filePath, image_id):
                 gt_ann_list.append(gt_annotations)
     return gt_ann_list
 
-def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative, tp_fp_fn_det):
+def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfn):
     
     if(len(gt_ann_list) > len(det_ann_list)):
         tp_fp_fn_det[2] = tp_fp_fn_det[2] + (len(gt_ann_list) - len(det_ann_list))
@@ -71,7 +75,7 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
     right_det_element = det_ann_list[0]
     index_right_element = 0
     num_detection = 0
-    tot_vol_err, tot_loc_err, tot_rot_err, tot_iou = float(0), float(0), float(0), float(0)
+    tot_vol_err, tot_loc_err, tot_rot_err, tot_iou, tot_dim_err = float(0), float(0), float(0), float(0), float(0)
 
     for gt_element in gt_ann_list :
         min_loc_err = 1000
@@ -88,8 +92,8 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
         #print("i remove element = " + str(right_det_element) + "of index " + str(index_right_element))
         det_ann_list.pop(index_right_element)
         num_detection = num_detection + 1
-        vol_err, location_err, rot_err, iou = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative, tp_fp_fn_det)
-        tot_vol_err, tot_loc_err, tot_rot_err, tot_iou =  tot_vol_err + vol_err, tot_loc_err + location_err, tot_rot_err + rot_err, tot_iou + iou
+        vol_err, location_err, rot_err, iou, dim_err = getStatistics(gt_element, right_det_element, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfn)
+        tot_vol_err, tot_loc_err, tot_rot_err, tot_iou, tot_dim_err =  tot_vol_err + vol_err, tot_loc_err + location_err, tot_rot_err + rot_err, tot_iou + iou, tot_dim_err + dim_err
     
     #if det ann list is  not empty means that is detected something that is not in the gt, and this means a 
     #false positive for the category of the object detected
@@ -101,7 +105,7 @@ def getMultipleStatistics(gt_ann_list, det_ann_list, true_positive, false_positi
     if num_detection == 0:
         num_detection = 1
 
-    return  tot_vol_err/float(num_detection), tot_loc_err/float(num_detection), tot_rot_err/float(num_detection), tot_iou/float(num_detection)            
+    return  tot_vol_err/float(num_detection), tot_loc_err/float(num_detection), tot_rot_err/float(num_detection), tot_iou/float(num_detection), tot_dim_err/float(num_detection)            
 
 
 def getDetAnnotation(res):
@@ -188,7 +192,7 @@ def getIoU(det_bbox, gt_bbox, tp_fp_fn_det):
 
 #calculate statistics between ground truth and detection
 #annotation order = [cat_id, dim, bbox, alpha, location, rotation_y]
-def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative, tp_fp_fn_det):
+def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfp):
   gt_cat_id = gt_annotation[0]
   gt_dim = gt_annotation[1]
   gt_bbox = gt_annotation[2]
@@ -213,25 +217,68 @@ def getStatistics(gt_annotation, det_annotation, true_positive, false_positive, 
   gt_vol = gt_dim[0]*gt_dim[1]*gt_dim[2]
   vol_err = abs(det_vol - gt_vol)
 
+  
+  #check the difference between the dimension
+  height_err = abs(det_dim[0] - gt_dim[0])
+  width_err = abs(det_dim[1] - gt_dim[1])
+  length_err = abs(det_dim[2] - gt_dim[2])
+
+  dim_ratio = np.array(det_dim)/np.array(gt_dim)
+
+  if (isTruePositive(dim_ratio[0], dim_threshold) and isTruePositive(dim_ratio[1], dim_threshold) and isTruePositive(dim_ratio[2], dim_threshold)):
+      dim_loc_rot_tpfp[0] = dim_loc_rot_tpfp[0] + 1
+  else:
+      dim_loc_rot_tpfp[1] = dim_loc_rot_tpfp[1] + 1  
+
+  dim_err = (height_err + width_err + length_err)/float(3)
+
   #check IoU of the front face of the 3dbbox
   iou = getIoU(det_bbox, gt_bbox, tp_fp_fn_det)
 
   #check the location of the center of the 3dbbox error using the euclidean distance
   location_err = np.linalg.norm(np.array(gt_location) - np.array(det_location))
 
+  loc_ratio = np.array(det_location)/ np.array(gt_location)
+  
+  if( isTruePositive(loc_ratio[0], loc_threshold) and isTruePositive(loc_ratio[1], loc_threshold) and isTruePositive(loc_ratio[2], loc_threshold)):
+      dim_loc_rot_tpfp[2] = dim_loc_rot_tpfp[2] + 1
+  else:
+      dim_loc_rot_tpfp[3] = dim_loc_rot_tpfp[3] +1  
+
   #check the error of the rotation 
   rot_err = abs(gt_rot_y - det_rot_y)
 
-  return vol_err, location_err, rot_err, iou
+  rot_ratio = det_rot_y/gt_rot_y
+
+  if( isTruePositive(rot_ratio, rot_threshold)):
+      dim_loc_rot_tpfp[4] = dim_loc_rot_tpfp[4] + 1
+  else:
+      dim_loc_rot_tpfp[5] = dim_loc_rot_tpfp[5] +1
+
+  return vol_err, location_err, rot_err, iou , dim_err
 
 def getPrecisionPerCat(cat_id, true_positive, false_positive):
-  if (true_positive[cat_id] + false_positive[cat_id]) == 0 :
-    return 0
-  precision = true_positive[cat_id]/float(true_positive[cat_id] + false_positive[cat_id])
-  return precision
+  return getPrecision(true_positive[cat_id], false_positive[cat_id])        
+  
+  #if (true_positive[cat_id] + false_positive[cat_id]) == 0 :
+  #  return 0
+  #precision = true_positive[cat_id]/float(true_positive[cat_id] + false_positive[cat_id])
+  #return precision
  
 def getRecallPerCat(cat_id, true_positive, false_negative):
   if (true_positive[cat_id] + false_negative[cat_id]) == 0 :
       return 0
   recall = true_positive[cat_id]/float(true_positive[cat_id] + false_negative[cat_id])
   return recall
+
+def isTruePositive(value, threshold):
+    if (value > threshold and value < (1 + 1 - threshold)):
+        return True
+    else:
+        return False
+
+def getPrecision(true_positive, false_positive):
+    if(true_positive + false_positive == 0):
+        return 0
+    else:
+        return(true_positive/float(true_positive + false_positive))
