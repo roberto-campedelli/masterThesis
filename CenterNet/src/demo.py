@@ -19,7 +19,7 @@ time_stats = ['tot', 'load', 'pre', 'net', 'dec', 'post', 'merge']
 
 #annotation file path
 #ann_file_path = "../data/my_dataset/annotations/annotations_3dop_train.json"
-ann_file_path = "../data/new_kitti.json"
+ann_file_path = "../data/kitti_testing/annotations/new_kitti.json"
 
 
 #initialize list for storing TP, FP and FN for each category
@@ -41,6 +41,7 @@ iou_errors = []
 rot_errors = []
 loc_errors = []
 dim_errors = []
+hwl_errors = []
 
 def demo(opt):
   os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
@@ -92,6 +93,7 @@ def demo(opt):
       #for multiple objet per image
       #print(res)
       det_ann = getMultipleDetAnnotation(res)
+      
       gt_ann = getMultipleGtAnnotation(ann_file_path, image_id)
 
       if(len(gt_ann) <= 0):
@@ -99,9 +101,10 @@ def demo(opt):
         continue
         
       #i print the number of object detected and the number of object in the ground truth
-      print("det elements = " + str(len(det_ann)))
-      print("gt elements = " + str(len(gt_ann)))
-
+      #print("det elements = " + str(len(det_ann)))
+      #print("gt elements = " + str(len(gt_ann)))
+   
+        
       '''
       #i print the detected and the ground truth elements
       print("detection annotation list = ")
@@ -112,9 +115,11 @@ def demo(opt):
         print(str(_) + "\n")
       '''
       
+      
+      
+      
       #i get the statistics of the image. The mean of the statistics of each object in the image
-      vol_err, loc_err, rot_err, iou, dim_err = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfp)
-
+      vol_err, loc_err, rot_err, iou, dim_err, hwl_err = getMultipleStatistics(gt_ann, det_ann, true_positive, false_positive, false_negative, tp_fp_fn_det, dim_loc_rot_tpfp)
 
       ############################## OLD CODE - for detecting just one element at time
       #for single object per image
@@ -133,6 +138,7 @@ def demo(opt):
       rot_errors.append(rot_err)
       dim_errors.append(dim_err)
       iou_errors.append(iou)
+      hwl_errors.append(hwl_err)
       
       #print("Volume error = " + str(vol_err))
       #print("Location error = " + str(loc_err))
@@ -143,30 +149,59 @@ def demo(opt):
       time_str = ''
       for stat in time_stats:
         time_str = time_str + '{} {:.3f}s |'.format(stat, ret[stat])
-      print(time_str)
+       #print(time_str)
 
   
 
-  #calculate the mean or some others stats of the array cumulatives of all the error value
-  vol_errors_np = (np.array(vol_errors) - min(vol_errors))/float(max(vol_errors) - min(vol_errors))
-  total_vol_error = np.sum(vol_errors_np) / vol_errors_np.size
+  #calculate the average mean of the array cumulatives of all the error value and normalize it in [0,1]
+  #vol_errors_normalized = (np.array(vol_errors) - min(vol_errors))/float(max(vol_errors) - min(vol_errors))
+  #total_vol_error_normalized = np.sum(vol_errors_normalized) / vol_errors_normalized.size
 
-  rot_errors_np = (np.array(rot_errors) - min(rot_errors))/float(max(rot_errors) - min(rot_errors))
-  total_rot_error = np.sum(rot_errors_np) / vol_errors_np.size
+  rot_errors_normalized = (np.array(rot_errors) - min(rot_errors))/float(max(rot_errors) - min(rot_errors))
+  total_rot_error_normalized = np.sum(rot_errors_normalized) / rot_errors_normalized.size
 
-  loc_errors_np = (np.array(loc_errors) - min(loc_errors))/float(max(loc_errors) - min(loc_errors))
-  total_loc_error = np.sum(loc_errors_np) / loc_errors_np.size
+  loc_errors_normalized = (np.array(loc_errors) - min(loc_errors))/float(max(loc_errors) - min(loc_errors))
+  total_loc_error_normalized = np.sum(loc_errors_normalized) / loc_errors_normalized.size
+
+  dim_errors_normalized = (np.array(dim_errors) - min(dim_errors))/float(max(dim_errors) - min(dim_errors))
+  total_dim_error_normalized = np.sum(dim_errors_normalized) / dim_errors_normalized.size
 
   total_iou = np.sum(np.array(iou_errors)) / len(iou_errors)
+
+  #vol_rmse = getRMSE(vol_errors)
+  rot_rmse = getRMSE(rot_errors)
+  dim_rmse = getRMSE(dim_errors)
+  loc_rmse = getRMSE(loc_errors)
+
+  #print("Vol RMSE = "  + str(vol_rmse))
+  #print("Dim RMSE = "  + str(dim_rmse))
+  #print("Loc RMSE = " + str(loc_rmse))
+  #print("Rot RMSE = "  + str(rot_rmse))
+
+  print("\n")
+  np_hwl_errors = np.array(hwl_errors)
+  mean_hwl_errors = np.sum(np_hwl_errors, axis=0) / len(hwl_errors)
+  print("Height error = " + str(mean_hwl_errors[0]))
+  print("Width error = " + str(mean_hwl_errors[1]))
+  print("Length error = " + str(mean_hwl_errors[2])) 
+  print("\n")
+ 
+
+  #print("Vol error not normalized = " + str(np.sum(np.array(vol_errors)) / len(vol_errors)))
+  print("Dim error  = " + str(np.sum(np.array(dim_errors)) / len(dim_errors)))
+  print("Loc error  = " + str(np.sum(np.array(loc_errors)) / len(loc_errors)))
+  print("Rot error  = " + str(np.sum(np.array(rot_errors)) / len(rot_errors)))
 
   #print(vol_errors_np.size)
   #print(rot_errors_np.size)
   #print(loc_errors_np.size)
   #print(len(iou_errors))
 
-  print("Total Volume error = " + str(total_vol_error))
-  print("Location error = " + str(total_loc_error))
-  print("Rotation error = " + str(total_rot_error))
+  #print("Volume error normalized in [0,1] = " + str(total_vol_error_normalized))
+  #print("Dimension error normalized in [0,1]  = " + str(total_dim_error_normalized))
+  #print("Location error normalized in [0,1]  = " + str(total_loc_error_normalized))
+  #print("Rotation error normalized in [0,1]  = " + str(total_rot_error_normalized))
+
   #print("IoU = " + str(total_iou))
 
   #print("classification TP = " + str(true_positive))
@@ -177,9 +212,13 @@ def demo(opt):
 
   #print("dim_loc_rot_tpfp = " + str(dim_loc_rot_tpfp))
 
-  print("dimension precision = " + str(getPrecision(dim_loc_rot_tpfp[0], dim_loc_rot_tpfp[1])))
-  print("location precision = " + str(getPrecision(dim_loc_rot_tpfp[2], dim_loc_rot_tpfp[3])))
-  print("rotation precision = " + str(getPrecision(dim_loc_rot_tpfp[4], dim_loc_rot_tpfp[5])))
+  print("\n")
+
+  print("Dimension precision = " + str(getPrecision(dim_loc_rot_tpfp[0], dim_loc_rot_tpfp[1])))
+  print("Location precision = " + str(getPrecision(dim_loc_rot_tpfp[2], dim_loc_rot_tpfp[3])))
+  print("Rotation precision = " + str(getPrecision(dim_loc_rot_tpfp[4], dim_loc_rot_tpfp[5])))
+
+  print("\n")
 
 
   for i in range(1, num_cat + 1):
@@ -197,14 +236,21 @@ def demo(opt):
   precision = precision/float(num_cat)
   recall = recall/float(num_cat)
 
+  print("\n")
+
   print("precision classification = " + str(precision))
   print("recall classification= " + str(recall))
 
   precision_detection = tp_fp_fn_det[0]/float(tp_fp_fn_det[0] + tp_fp_fn_det[1])
   recall_detection = tp_fp_fn_det[0]/float(tp_fp_fn_det[0] + tp_fp_fn_det[2])
 
-  print("precision detection = " + str(precision_detection))
-  print("recall detection = " + str(recall_detection))
+  #print("precision detection = " + str(precision_detection))
+  #print("recall detection = " + str(recall_detection))
+
+  print("\n")
+
+  printThreshold()
+
 
 
     
